@@ -1,0 +1,44 @@
+{
+  "name": "lambda-github-pusher",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "clean": "rimraf ./dist",
+    "lint": "tslint --project tsconfig.json || true",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Giftbit/lambda-github-pusher.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Giftbit/lambda-github-pusher/issues"
+  },
+  "homepage": "https://github.com/Giftbit/lambda-github-pusher#readme",
+  "devDependencies": {
+    "@types/aws-lambda": "0.0.6",
+    "@types/aws-sdk": "0.0.42",
+    "@types/github": "0.0.0",
+    "@types/node": "^7.0.0",
+    "babel-core": "^6.21.0",
+    "babel-loader": "^6.2.10",
+    "babel-polyfill": "^6.20.0",
+    "babel-preset-es2015": "^6.18.0",
+    "rimraf": "^2.5.4",
+    "ts-loader": "^1.3.3",
+    "tslint": "^4.3.1",
+    "typescript": "^2.1.5",
+    "webpack": "^1.14.0",
+    "webpack-fail-plugin": "^1.0.5",
+    "zip-webpack-plugin": "^0.3.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.7.25",
+    "github": "^8.1.0"
+  }
+}
