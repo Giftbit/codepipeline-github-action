@@ -1,8 +1,9 @@
 const failPlugin = require('webpack-fail-plugin');
+const path = require('path');
 const ZipPlugin = require('zip-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.ts',
+    entry: path.join(__dirname, 'src', 'index.ts'),
     target: 'node',
     node: {
         // Allow these globals.
@@ -10,7 +11,7 @@ module.exports = {
         __dirname: false
     },
     output: {
-        path: './dist/',
+        path: 'dist',
         filename: 'index.js',
         libraryTarget: 'commonjs2'
     },
@@ -32,17 +33,26 @@ module.exports = {
                 loader: 'babel-loader?presets[]=es2015&compact=false'
             },
             {
+                test: /\.json$/,
+                loader: 'json-loader'
+            },
+            {
                 test: /\.ts(x?)$/,
                 loader: 'babel-loader?presets[]=es2015&compact=false!ts-loader'
+            },
+            {
+                // Github uses dynamic loading so we'll call out files manually.
+                test: /\/node_modules\/github\//,
+                loader: 'file?name=[path][name].[ext]'
             }
         ]
     },
     plugins: [
         failPlugin,
         new ZipPlugin({
-            path: path.join(__dirname, 'dist', fxn),
+            path: path.join(__dirname, 'dist'),
             pathPrefix: "",
-            filename: `${fxn}.zip`
+            filename: `dist.zip`
         })
     ]
 };
