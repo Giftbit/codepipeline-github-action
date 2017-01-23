@@ -7,7 +7,7 @@
     "clean": "rimraf ./dist",
     "lint": "tslint --project tsconfig.json || true",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "upload": "aws s3 cp ./dist/dist.zip s3://giftbit-public-resources/cloudformation/lambda-github-pusher/lambdaFunction.zip"
+    "upload": "aws s3 cp ./dist/dist.zip s3://giftbit-public-resources/cloudformation/lambda-github-pusher/`date +%Y-%m-%d`.zip && aws s3api put-object-acl --bucket giftbit-public-resources --key cloudformation/lambda-github-pusher/`date +%Y-%m-%d`.zip --acl public-read"
   },
   "repository": {
     "type": "git",

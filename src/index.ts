@@ -15,7 +15,12 @@ const codepipeline = new aws.CodePipeline({
     apiVersion: "2015-07-09",
     credentials: creds
 });
+const kms = new aws.KMS({
+    apiVersion: "2014-11-01",
+    credentials: creds
+});
 
+//noinspection JSUnusedGlobalSymbols
 export function handler(evt: CodePipelineEvent, ctx: awslambda.Context, callback: awslambda.Callback): void {
     console.log("event", JSON.stringify(evt, null, 2));
     handlerAsync(evt, ctx)
@@ -41,7 +46,7 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
                 message: err.message,
                 externalExecutionId: ctx.awsRequestId
             }
-        });
+        }).promise();
         return;
     }
 
@@ -50,7 +55,7 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
         console.log("job success");
         await codepipeline.putJobSuccessResult({
             jobId: jobId
-        });
+        }).promise();
     } catch (err) {
         console.error(err);
         await codepipeline.putJobFailureResult({
@@ -60,7 +65,7 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
                 message: err.message,
                 externalExecutionId: ctx.awsRequestId
             }
-        });
+        }).promise();
     }
     return {};
 }
@@ -74,7 +79,7 @@ async function pushGithub(): Promise<void> {
     });
     github.authenticate({
         type: "oauth",
-        token: "AUTH_TOKEN" // todo
+        token: await getGithubOauthToken()
     });
 
     const createResp = await github.pullRequests.create({
@@ -89,10 +94,17 @@ async function pushGithub(): Promise<void> {
     const mergeResp = await github.pullRequests.merge({
         owner: process.env["GITHUB_REPO_OWNER"],
         repo: process.env["GITHUB_REPO"],
-        number: 0,          // todo
+        number: createResp.id,
         commit_title: "Automatic merge"
     });
     console.log("mergeResp", mergeResp);
+}
+
+async function getGithubOauthToken(): Promise<string> {
+    const response = await kms.decrypt({
+        CiphertextBlob: new Buffer(process.env["GITHUB_OAUTH"], "base64")
+    }).promise();
+    return (response.Plaintext as Buffer).toString("ascii");
 }
 
 function checkConfig(): void {

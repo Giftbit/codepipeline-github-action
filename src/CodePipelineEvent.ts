@@ -17,5 +17,5 @@ export interface CodePipelineEvent {
                 accessKeyId: string;
             }
         }
-    }
+    };
 }
