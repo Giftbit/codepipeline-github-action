@@ -28,7 +28,6 @@
   "homepage": "https://github.com/Giftbit/lambda-github-pusher#readme",
   "devDependencies": {
     "@types/aws-lambda": "0.0.6",
-    "@types/aws-sdk": "0.0.42",
     "@types/github": "0.0.0",
     "@types/node": "^7.0.0",
     "babel-core": "^6.22.1",
