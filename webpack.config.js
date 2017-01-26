@@ -20,7 +20,10 @@ module.exports = {
         'aws-sdk': 'aws-sdk',
         'awslambda': 'awslambda',
         'dynamodb-doc': 'dynamodb-doc',
-        'imagemagick': 'imagemagick'
+        'imagemagick': 'imagemagick',
+
+        // Has dynamic imports so we'll leave it out.
+        'github': 'github'
     },
     bail: true,
     resolve: {
@@ -39,11 +42,6 @@ module.exports = {
             {
                 test: /\.ts(x?)$/,
                 loader: 'babel-loader?presets[]=es2015&compact=false!ts-loader'
-            },
-            {
-                // Github uses dynamic loading so we'll call out files manually.
-                test: /\/node_modules\/github\//,
-                loader: 'file?name=[path][name].[ext]'
             }
         ]
     },

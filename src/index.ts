@@ -5,10 +5,11 @@ import * as GitHub from "github";
 import {CodePipelineEvent} from "./CodePipelineEvent";
 
 // The github library uses dynamic loading which webpack hates.
-// Just call out the files manually.
-require("github/lib/error");
-require("github/lib/util");
-require("github/lib/promise");
+// This calls out files that are copied for distribution.
+require("file?name=[path][name].[ext]!github/lib");
+require("file?name=[path][name].[ext]!github/lib/error");
+require("file?name=[path][name].[ext]!github/lib/util");
+require("file?name=[path][name].[ext]!github/lib/promise");
 
 const creds = new aws.EnvironmentCredentials("AWS");
 const codepipeline = new aws.CodePipeline({
