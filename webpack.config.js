@@ -8,7 +8,8 @@ module.exports = {
     node: {
         // Allow these globals.
         __filename: false,
-        __dirname: false
+        __dirname: false,
+        Base64: false
     },
     output: {
         path: 'dist',
@@ -20,10 +21,7 @@ module.exports = {
         'aws-sdk': 'aws-sdk',
         'awslambda': 'awslambda',
         'dynamodb-doc': 'dynamodb-doc',
-        'imagemagick': 'imagemagick',
-
-        // Has dynamic imports so we'll leave it out.
-        'github': 'github'
+        'imagemagick': 'imagemagick'
     },
     bail: true,
     resolve: {
@@ -33,7 +31,7 @@ module.exports = {
         loaders: [
             {
                 test: /\.js$/,
-                loader: 'babel-loader?presets[]=es2015&compact=false'
+                loader: 'babel-loader?presets[]=es2015&compact=false&babelrc=false'
             },
             {
                 test: /\.json$/,
@@ -41,7 +39,7 @@ module.exports = {
             },
             {
                 test: /\.ts(x?)$/,
-                loader: 'babel-loader?presets[]=es2015&compact=false!ts-loader'
+                loader: 'babel-loader?presets[]=es2015&compact=false&babelrc=false!ts-loader'
             }
         ]
     },

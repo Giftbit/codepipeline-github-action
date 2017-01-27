@@ -1,15 +1,11 @@
 import "babel-polyfill";
 import * as aws from "aws-sdk";
 import * as awslambda from "aws-lambda";
-import * as GitHub from "github";
 import {CodePipelineEvent} from "./CodePipelineEvent";
 
-// The github library uses dynamic loading which webpack hates.
-// This calls out files that are copied for distribution.
-require("file?name=[path][name].[ext]!github/lib");
-require("file?name=[path][name].[ext]!github/lib/error");
-require("file?name=[path][name].[ext]!github/lib/util");
-require("file?name=[path][name].[ext]!github/lib/promise");
+// I'm too lazy to make a type file.
+// see: http://github-tools.github.io/github/docs/3.1.0/index.html
+const GitHub: any = require("github-api/dist/GitHub.bundle.min.js");
 
 const creds = new aws.EnvironmentCredentials("AWS");
 const codepipeline = new aws.CodePipeline({
@@ -72,30 +68,21 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
 }
 
 async function pushGithub(): Promise<void> {
+    const oauthToken = await getGithubOauthToken();
     const github = new GitHub({
-        debug: true,
-        protocol: "https",
-        followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
-        timeout: 5000
-    });
-    github.authenticate({
-        type: "oauth",
-        token: await getGithubOauthToken()
+        token: oauthToken
     });
 
-    const createResp = await github.pullRequests.create({
-        owner: process.env["GITHUB_REPO_OWNER"],
-        repo: process.env["GITHUB_REPO"],
+    const repo = github.getRepo(process.env["GITHUB_REPO_OWNER"], process.env["GITHUB_REPO"]);
+
+    const createResp = await repo.createPullRequest({
         title: "Automatic pull request",
-        head: process.env["GITHUB_SOURCE_BRANCH"],
-        base: process.env["GITHUB_DEST_BRANCH"]
+        head: process.env["GITHUB_SOURCE_BRANCH"],  // src
+        base: process.env["GITHUB_DEST_BRANCH"]     // dest
     });
     console.log("createResp", createResp);
 
-    const mergeResp = await github.pullRequests.merge({
-        owner: process.env["GITHUB_REPO_OWNER"],
-        repo: process.env["GITHUB_REPO"],
-        number: createResp.id,
+    const mergeResp = await repo.mergePullRequest(createResp.id, {
         commit_title: "Automatic merge"
     });
     console.log("mergeResp", mergeResp);
