@@ -1,11 +1,8 @@
 import "babel-polyfill";
 import * as aws from "aws-sdk";
 import * as awslambda from "aws-lambda";
+import * as https from "https";
 import {CodePipelineEvent} from "./CodePipelineEvent";
-
-// I'm too lazy to make a type file.
-// see: http://github-tools.github.io/github/docs/3.1.0/index.html
-const GitHub: any = require("github-api/dist/GitHub.bundle.min.js");
 
 const creds = new aws.EnvironmentCredentials("AWS");
 const codepipeline = new aws.CodePipeline({
@@ -69,22 +66,23 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
 
 async function pushGithub(): Promise<void> {
     const oauthToken = await getGithubOauthToken();
-    const github = new GitHub({
-        token: oauthToken
-    });
 
-    const repo = github.getRepo(process.env["GITHUB_REPO_OWNER"], process.env["GITHUB_REPO"]);
-
-    const createResp = await repo.createPullRequest({
-        title: "Automatic pull request",
+    const createPath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls`;
+    const createBody = {
+        title: "Automatic pull request by CI",
         head: process.env["GITHUB_SOURCE_BRANCH"],  // src
         base: process.env["GITHUB_DEST_BRANCH"]     // dest
-    });
+    };
+    console.log("create pull request", createPath, createBody);
+    const createResp = await request(createPath, "POST", oauthToken, createBody);
     console.log("createResp", createResp);
 
-    const mergeResp = await repo.mergePullRequest(createResp.id, {
-        commit_title: "Automatic merge"
-    });
+    const mergePath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls/${createResp.number}/merge`;
+    const mergeBody = {
+        "commit_message": "Automatic merge by CI"
+    };
+    console.log("merge pull request", mergePath, mergeBody);
+    const mergeResp = await request(mergePath, "PUT", oauthToken, mergeBody);
     console.log("mergeResp", mergeResp);
 }
 
@@ -93,6 +91,65 @@ async function getGithubOauthToken(): Promise<string> {
         CiphertextBlob: new Buffer(process.env["GITHUB_OAUTH"], "base64")
     }).promise();
     return (response.Plaintext as Buffer).toString("ascii");
+}
+
+/**
+ * All the libaries suck.  Make this github api reequest manually.
+ */
+function request(path: string, method: string, oauthToken: string, body?: Object): Promise<any> {
+    const bodyJson = JSON.stringify(body);
+    const options: https.RequestOptions = {
+        hostname: "api.github.com",
+        port: 443,
+        path: path,
+        method: method,
+        headers: {
+            "Authorization": `token ${oauthToken}`,
+            "Accept": "application/json",
+            "User-Agent": "Giftbit/lambda-github-pusher"
+        }
+    };
+
+    if (body) {
+        options.headers["Content-Length"] = bodyJson.length;
+        options.headers["Content-Type"] = "application/json"
+    }
+
+    return new Promise((resolve, reject) => {
+        const request = https.request(options, (response) => {
+            console.log(`response.statusCode ${response.statusCode}`);
+            console.log(`response.headers ${JSON.stringify(response.headers)}`);
+
+            const responseBody: string[] = [];
+            response.setEncoding("utf8");
+            response.on("data", d => {
+                responseBody.push(d as string);
+            });
+            response.on("end", () => {
+                if (response.statusCode >= 400) {
+                    console.log("response error", responseBody);
+                    reject(new Error(responseBody.join("")));
+                } else {
+                    try {
+                        const responseJson = JSON.parse(responseBody.join(""));
+                        resolve(responseJson);
+                    } catch (e) {
+                        reject(e);
+                    }
+                }
+            });
+        });
+
+        request.on("error", error => {
+            console.log("request error", error);
+            reject(error);
+        });
+
+        if (body) {
+            request.write(bodyJson);
+        }
+        request.end();
+    });
 }
 
 function checkConfig(): void {
