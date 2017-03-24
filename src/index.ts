@@ -46,10 +46,9 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
 
     try {
         const prNumber = await createPullRequest();
-        if (process.env["AUTO_MERGE"] == "true") {
+        if (process.env["AUTO_MERGE"] === "true" && prNumber) {
             await mergePullRequest(prNumber);
         }
-        console.log("job success");
         await codepipeline.putJobSuccessResult({
             jobId: jobId
         }).promise();
@@ -68,17 +67,26 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
 }
 
 async function createPullRequest(): Promise<string> {
-    const createPath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls`;
-    const createBody = {
-        title: "Automatic pull request by CI",
-        head: process.env["GITHUB_SOURCE_BRANCH"],  // src
-        base: process.env["GITHUB_DEST_BRANCH"]     // dest
-    };
-    console.log("create pull request", createPath, createBody);
-    const createResp = await request(createPath, "POST", createBody);
-    console.log("createResp", createResp);
+    try {
+        const createPath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls`;
+        const createBody = {
+            title: "Automatic pull request by CI",
+            head: process.env["GITHUB_SOURCE_BRANCH"],  // src
+            base: process.env["GITHUB_DEST_BRANCH"]     // dest
+        };
+        console.log("create pull request", createPath, createBody);
+        const createResp = await request(createPath, "POST", createBody);
+        console.log("createResp", createResp);
 
-    return createResp.number;
+        return createResp.number;
+    } catch (err) {
+        if (err && Array.isArray(err.errors) && err.errors.length === 1 && err.errors[0].message === "No commits between master and staging") {
+            // Nothing changed so no pull request.  This is fine.
+            return null;
+        }
+
+        throw err;
+    }
 }
 
 async function mergePullRequest(prNumber: string): Promise<void> {
@@ -123,7 +131,7 @@ async function request(path: string, method: string, body?: Object): Promise<any
 
     if (body) {
         options.headers["Content-Length"] = bodyJson.length;
-        options.headers["Content-Type"] = "application/json"
+        options.headers["Content-Type"] = "application/json";
     }
 
     return await new Promise((resolve, reject) => {

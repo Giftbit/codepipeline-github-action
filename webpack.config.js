@@ -1,4 +1,3 @@
-const failPlugin = require('webpack-fail-plugin');
 const path = require('path');
 const ZipPlugin = require('zip-webpack-plugin');
 
@@ -12,7 +11,7 @@ module.exports = {
         Base64: false
     },
     output: {
-        path: 'dist',
+        path: path.join(__dirname, 'dist'),
         filename: 'index.js',
         libraryTarget: 'commonjs2'
     },
@@ -25,26 +24,44 @@ module.exports = {
     },
     bail: true,
     resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.ts', '.tsx', '.js']
+        extensions: ['.ts', '.tsx', '.js']
     },
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.js$/,
-                loader: 'babel-loader?presets[]=es2015&compact=false&babelrc=false'
-            },
-            {
-                test: /\.json$/,
-                loader: 'json-loader'
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: ['es2015'],
+                            compact: false
+                        }
+                    }
+                ]
             },
             {
                 test: /\.ts(x?)$/,
-                loader: 'babel-loader?presets[]=es2015&compact=false&babelrc=false!ts-loader'
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: ['es2015'],
+                            compact: false
+                        }
+                    },
+                    'ts-loader'
+                ]
+            },
+            {
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+                use: [
+                    'file-loader'
+                ]
             }
         ]
     },
     plugins: [
-        failPlugin,
         new ZipPlugin({
             path: path.join(__dirname, 'dist'),
             pathPrefix: "",
