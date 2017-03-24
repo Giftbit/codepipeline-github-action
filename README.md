@@ -19,6 +19,8 @@ This function uses the following environment variables:
   - The github branch to merge into.
 - `GITHUB_OAUTH`
   - The [github oauth token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the GitHub user to run the commands as.  This value *must* be KMS encrypted.  See the example CloudFormation template linked below for how the token can be encrypted automatically.
+- `AUTO_MERGE` *(optional)*
+  - If `true` automatically merge the created pull request.
 
 Check out [Giftbit/sam-scaffold](https://github.com/Giftbit/sam-scaffold/blob/master/typescript/infrastructure/ci.yaml) for an example CloudFormation template that uses this function. 
 

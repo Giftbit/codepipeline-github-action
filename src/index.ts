@@ -45,7 +45,10 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
     }
 
     try {
-        await pushGithub();
+        const prNumber = await createPullRequest();
+        if (process.env["AUTO_MERGE"] == "true") {
+            await mergePullRequest(prNumber);
+        }
         console.log("job success");
         await codepipeline.putJobSuccessResult({
             jobId: jobId
@@ -64,9 +67,7 @@ async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Pro
     return {};
 }
 
-async function pushGithub(): Promise<void> {
-    const oauthToken = await getGithubOauthToken();
-
+async function createPullRequest(): Promise<string> {
     const createPath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls`;
     const createBody = {
         title: "Automatic pull request by CI",
@@ -74,29 +75,39 @@ async function pushGithub(): Promise<void> {
         base: process.env["GITHUB_DEST_BRANCH"]     // dest
     };
     console.log("create pull request", createPath, createBody);
-    const createResp = await request(createPath, "POST", oauthToken, createBody);
+    const createResp = await request(createPath, "POST", createBody);
     console.log("createResp", createResp);
 
-    const mergePath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls/${createResp.number}/merge`;
+    return createResp.number;
+}
+
+async function mergePullRequest(prNumber: string): Promise<void> {
+    const mergePath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls/${prNumber}/merge`;
     const mergeBody = {
         "commit_message": "Automatic merge by CI"
     };
     console.log("merge pull request", mergePath, mergeBody);
-    const mergeResp = await request(mergePath, "PUT", oauthToken, mergeBody);
+    const mergeResp = await request(mergePath, "PUT", mergeBody);
     console.log("mergeResp", mergeResp);
 }
 
+let cachedOauthToken: string = null;
 async function getGithubOauthToken(): Promise<string> {
-    const response = await kms.decrypt({
-        CiphertextBlob: new Buffer(process.env["GITHUB_OAUTH"], "base64")
-    }).promise();
-    return (response.Plaintext as Buffer).toString("ascii");
+    if (!cachedOauthToken) {
+        const response = await kms.decrypt({
+            CiphertextBlob: new Buffer(process.env["GITHUB_OAUTH"], "base64")
+        }).promise();
+        cachedOauthToken = (response.Plaintext as Buffer).toString("ascii");
+    }
+    return cachedOauthToken;
 }
 
 /**
- * All the libaries suck.  Make this github api reequest manually.
+ * All the libaries suck.  Make this github api request manually.
  */
-function request(path: string, method: string, oauthToken: string, body?: Object): Promise<any> {
+async function request(path: string, method: string, body?: Object): Promise<any> {
+    const oauthToken = await getGithubOauthToken();
+
     const bodyJson = JSON.stringify(body);
     const options: https.RequestOptions = {
         hostname: "api.github.com",
@@ -115,7 +126,7 @@ function request(path: string, method: string, oauthToken: string, body?: Object
         options.headers["Content-Type"] = "application/json"
     }
 
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
         const request = https.request(options, (response) => {
             console.log(`response.statusCode ${response.statusCode}`);
             console.log(`response.headers ${JSON.stringify(response.headers)}`);
