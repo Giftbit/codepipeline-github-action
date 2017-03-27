@@ -152,8 +152,12 @@ async function request(path: string, method: string, body?: Object): Promise<any
             });
             response.on("end", () => {
                 if (response.statusCode >= 400) {
-                    console.log("response error", responseBody);
-                    reject(new Error(responseBody.join("")));
+                    try {
+                        console.log("response error", responseBody.join(""));
+                        reject(JSON.parse(responseBody.join("")));
+                    } catch (e) {
+                        reject(e);
+                    }
                 } else {
                     try {
                         const responseJson = JSON.parse(responseBody.join(""));
