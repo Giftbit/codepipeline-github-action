@@ -80,9 +80,15 @@ async function createPullRequest(): Promise<string> {
 
         return createResp.number;
     } catch (err) {
-        if (err && Array.isArray(err.errors) && err.errors.length === 1 && err.errors[0].message === "No commits between master and staging") {
-            // Nothing changed so no pull request.  This is fine.
-            return null;
+        if (err && Array.isArray(err.errors) && err.errors.length === 1) {
+            if (err.errors[0].code === "custom" && err.errors[0].message === "No commits between master and staging") {
+                // Nothing changed so no pull request.  This is fine.
+                return null;
+            }
+            if (err.errors[0].code === "custom" && /^A pull request already exists for /.test(err.errors[0].message)) {
+                // There's already a pull request for this.  This is fine.
+                return null;
+            }
         }
 
         throw err;
