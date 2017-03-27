@@ -70,7 +70,7 @@ async function createPullRequest(): Promise<string> {
     try {
         const createPath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls`;
         const createBody = {
-            title: "Automatic pull request by CI",
+            title: process.env["PULL_REQUEST_MESSAGE"] || "Automatic pull request by CI",
             head: process.env["GITHUB_SOURCE_BRANCH"],  // src
             base: process.env["GITHUB_DEST_BRANCH"]     // dest
         };
@@ -92,7 +92,7 @@ async function createPullRequest(): Promise<string> {
 async function mergePullRequest(prNumber: string): Promise<void> {
     const mergePath = `/repos/${process.env["GITHUB_REPO_OWNER"]}/${process.env["GITHUB_REPO"]}/pulls/${prNumber}/merge`;
     const mergeBody = {
-        "commit_message": "Automatic merge by CI"
+        "commit_message": process.env["MERGE_MESSAGE"] || "Automatic merge by CI"
     };
     console.log("merge pull request", mergePath, mergeBody);
     const mergeResp = await request(mergePath, "PUT", mergeBody);
