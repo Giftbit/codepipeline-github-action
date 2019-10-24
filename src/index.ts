@@ -1,4 +1,3 @@
-import "babel-polyfill";
 import * as aws from "aws-sdk";
 import * as awslambda from "aws-lambda";
 import * as https from "https";
@@ -15,18 +14,8 @@ const kms = new aws.KMS({
 });
 
 //noinspection JSUnusedGlobalSymbols
-export function handler(evt: CodePipelineEvent, ctx: awslambda.Context, callback: awslambda.Callback): void {
+export async function handler(evt: CodePipelineEvent, ctx: awslambda.Context): Promise<any> {
     console.log("event", JSON.stringify(evt, null, 2));
-    handlerAsync(evt, ctx)
-        .then(res => {
-            callback(undefined, res);
-        }, err => {
-            console.error(JSON.stringify(err, null, 2));
-            callback(err);
-        });
-}
-
-async function handlerAsync(evt: CodePipelineEvent, ctx: awslambda.Context): Promise<any> {
     const jobId = evt["CodePipeline.job"].id;
 
     try {
@@ -117,7 +106,7 @@ async function getGithubOauthToken(): Promise<string> {
 }
 
 /**
- * All the libaries suck.  Make this github api request manually.
+ * All the libraries suck.  Make this github api request manually.
  */
 async function request(path: string, method: string, body?: Object): Promise<any> {
     const oauthToken = await getGithubOauthToken();

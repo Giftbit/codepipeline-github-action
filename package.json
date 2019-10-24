@@ -1,13 +1,13 @@
 {
   "name": "codepipeline-github-action",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Push GitHub branches in a CodePipeline.",
   "scripts": {
     "build": "webpack",
     "clean": "rimraf ./dist",
     "lint": "tslint --project tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "upload": "npm run clean && npm run build && aws s3 cp ./dist/dist.zip s3://giftbit-public-resources/cloudformation/codepipeline-github-action/`date +%Y-%m-%d`.zip --acl public-read"
+    "upload": "npm run clean && npm run build && aws s3 cp ./dist/dist.zip s3://lightrail-public-resources/cloudformation/codepipeline-github-action/`date +%Y-%m-%d`.zip --acl public-read"
   },
   "repository": {
     "type": "git",
@@ -27,22 +27,21 @@
   },
   "homepage": "https://github.com/Giftbit/codepipeline-github-action#readme",
   "devDependencies": {
-    "@types/aws-lambda": "0.0.9",
-    "@types/node": "^7.0.0",
-    "babel-core": "^6.22.1",
-    "babel-loader": "^6.2.10",
-    "babel-polyfill": "^6.22.0",
-    "babel-preset-es2015": "^6.22.0",
-    "file-loader": "^0.10.1",
-    "json-loader": "^0.5.4",
-    "rimraf": "^2.5.4",
-    "ts-loader": "^2.0.3",
-    "tslint": "^4.3.1",
-    "typescript": "^2.1.5",
-    "webpack": "^2.3.1",
-    "zip-webpack-plugin": "^1.1.0"
+    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.0",
+    "@types/aws-lambda": "8.10.33",
+    "@types/node": "^10.12.18",
+    "babel-loader": "^8.0.6",
+    "file-loader": "^4.2.0",
+    "rimraf": "^3.0.0",
+    "ts-loader": "^6.2.0",
+    "tslint": "^5.12.0",
+    "typescript": "^3.2.2",
+    "webpack": "^4.28.1",
+    "webpack-cli": "^3.1.2",
+    "zip-webpack-plugin": "^3.0.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.7.27"
+    "aws-sdk": "^2.380.0"
   }
 }

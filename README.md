@@ -30,6 +30,6 @@ Check out [Giftbit/sam-scaffold](https://github.com/Giftbit/sam-scaffold/blob/ma
 
 ## Development
 
-The only external dependency is [node](https://nodejs.org/en/).  The source code is written in [TypeScript](https://www.typescriptlang.org/).
+The only external dependency is [node](https://nodejs.org/en/) >= 10.  The source code is written in [TypeScript](https://www.typescriptlang.org/).
 
 From the command line `npm install && npm run build` to build the distribution zip file, which will be at `dist/dist.zip`.

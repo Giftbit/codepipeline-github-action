@@ -34,8 +34,10 @@ module.exports = {
                     {
                         loader: 'babel-loader',
                         options: {
-                            presets: ['es2015'],
-                            compact: false
+                            presets: [['@babel/env', {targets: {node: '10.16'}}]],
+                            plugins: [],
+                            compact: false,
+                            babelrc: false
                         }
                     }
                 ]
@@ -46,8 +48,10 @@ module.exports = {
                     {
                         loader: 'babel-loader',
                         options: {
-                            presets: ['es2015'],
-                            compact: false
+                            presets: [['@babel/env', {targets: {node: '10.16'}}]],
+                            plugins: [],
+                            compact: false,
+                            babelrc: false
                         }
                     },
                     'ts-loader'
