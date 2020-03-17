@@ -2,6 +2,7 @@ const path = require('path');
 const ZipPlugin = require('zip-webpack-plugin');
 
 module.exports = {
+    mode: 'production',
     entry: path.join(__dirname, 'src', 'index.ts'),
     target: 'node',
     node: {

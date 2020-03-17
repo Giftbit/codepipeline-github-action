@@ -6,7 +6,7 @@ Trigger GitHub actions in AWS CodePipeline
 
 This is the source code for an [AWS Lambda](http://docs.aws.amazon.com/lambda/latest/dg/welcome.html) function that can be used as a [CodePipeline](http://docs.aws.amazon.com/codepipeline/latest/userguide/welcome.html) step to create and optionally merge a [GitHub pull request](https://help.github.com/articles/about-pull-requests/) between branches.  This is most useful as part of a continuous integration flow between a staging pipeline and a production pipeline.
 
-To use this in your own CodePipeline you can build the project and upload it to your own S3 bucket, or you can reference the latest build at s3://giftbit-public-resources/cloudformation/codepipeline-github-action/2017-03-27.zip
+To use this in your own CodePipeline you can build the project and upload it to your own S3 bucket, or you can reference the latest build at s3://lightrail-public-resources/cloudformation/codepipeline-github-action/2020-03-17.zip
 
 This function uses the following environment variables:
 - `GITHUB_REPO_OWNER`

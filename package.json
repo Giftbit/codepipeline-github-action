@@ -1,6 +1,6 @@
 {
   "name": "codepipeline-github-action",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "description": "Push GitHub branches in a CodePipeline.",
   "scripts": {
     "build": "webpack",
@@ -27,21 +27,21 @@
   },
   "homepage": "https://github.com/Giftbit/codepipeline-github-action#readme",
   "devDependencies": {
-    "@babel/core": "^7.1.2",
-    "@babel/preset-env": "^7.1.0",
-    "@types/aws-lambda": "8.10.33",
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "@types/aws-lambda": "8.10.46",
     "@types/node": "^10.12.18",
     "babel-loader": "^8.0.6",
-    "file-loader": "^4.2.0",
-    "rimraf": "^3.0.0",
+    "file-loader": "^6.0.0",
+    "rimraf": "^3.0.2",
     "ts-loader": "^6.2.0",
     "tslint": "^5.12.0",
-    "typescript": "^3.2.2",
-    "webpack": "^4.28.1",
-    "webpack-cli": "^3.1.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11",
     "zip-webpack-plugin": "^3.0.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.380.0"
+    "aws-sdk": "^2.641.0"
   }
 }
